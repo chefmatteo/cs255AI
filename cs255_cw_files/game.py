@@ -19,6 +19,13 @@ class Game:
 		full = False
 		# index is used to keep track of which player's move it is
 		index = 0
+		# Display initial board
+		print("\n=== Starting New Game ===")
+		print(f"Board size: {self.gameBoard.numRows} rows x {self.gameBoard.numColumns} columns")
+		print(f"Pieces needed to win: {self.gameBoard.winNum}")
+		print("\nInitial board:")
+		self.gameBoard.printBoard()
+		print()
 		# play the game until a player wins or it is a draw (i.e., the board is full)
 		while not won and not full:
 			# Get the current player, and update the index
@@ -34,31 +41,39 @@ class Game:
 			if moveDone == True:
 				won = self.gameBoard.checkWin()
 				full = self.gameBoard.checkFull()
-				# Uncomment the following line to print each move
-				# self.gameBoard.printBoard()
+				# Print board after each move to observe game progress
+				print(f"Player {currPlayer.name} placed piece in column {move}")
+				self.gameBoard.printBoard()
+				print()  # Add blank line for readability
 			else:
 				print("Player made illegal move. Turn lost.")
 
 			index = (index + 1) % 2
 
 		if won and currPlayer == self.player1:
+			print("\n=== Game Over ===")
 			print("You Win!")
 			print("Nodes expanded:", self.player1.numExpanded)
 			print("Branches pruned:", self.player1.numPruned)
+			print("\nFinal board:")
 			self.gameBoard.printBoard()
 			return 1
 
 		if won and currPlayer == self.player2:
+			print("\n=== Game Over ===")
 			print("You Lose!")
 			print("Nodes expanded:", self.player1.numExpanded)
 			print("Branches pruned:", self.player1.numPruned)
+			print("\nFinal board:")
 			self.gameBoard.printBoard()
 			return -1
 
 		if full and not won:
+			print("\n=== Game Over ===")
 			print("It's a Draw!")
 			print("Nodes expanded:", self.player1.numExpanded)
 			print("Branches pruned:", self.player1.numPruned)
+			print("\nFinal board:")
 			self.gameBoard.printBoard()
 			return 0
 

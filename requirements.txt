@@ -1,0 +1,7 @@
+# Python standard library modules are used (tkinter, sys, os, etc.)
+# Core game implementation requires no external dependencies
+# tkinter comes with Python standard installation
+
+# Optional dependencies for Flask web frontend:
+flask>=2.0.0
+
