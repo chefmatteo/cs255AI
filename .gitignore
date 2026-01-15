@@ -42,6 +42,11 @@ Thumbs.db
 # Project specific
 *.pyc
 
-
+# LaTeX build artifacts
+*.aux
+*.log
+*.synctex.gz
+*.fdb_latexmk
+*.fls
 
 *.vscode/
