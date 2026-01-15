@@ -31,6 +31,8 @@ import math
 #
 # IMPORTANT: You MUST TRACK how many nodes you expand in your minimax and minimax with alpha-beta implementations.
 # IMPORTANT: In your minimax with alpha-beta implementation, when pruning you MUST TRACK the number of times you prune.
+
+
 class Player:
     # note that because of the game rule, the piece must fall into the lowest unfilled location. The user has no control over the row and only the column. Thus when we construct the algorithm, we only return a single interger within [0, maxColumns - 1]
 
@@ -39,13 +41,47 @@ class Player:
         self.numExpanded = 0  # Use this to track the number of nodes you expand
         self.numPruned = 0  # Use this to track the number of times you prune
 
+    def _calculateMaxDepth(self, board):
+        # Notice that depth is crucial for the performance of the algorithm, because it limits the number of nodes that are explored, for larger boards, we are looking at an astronomical number of nodes to explore
+        # Calculate adaptive maximum depth based on board size and game complexity
+        # Returns a reasonable depth limit that balances search quality vs. computation time.
+
+        # Base depth calculation: consider board size and win requirement
+        totalSpaces = board.numRows * board.numColumns
+
+        # Logic:
+        # For small boards (e.g., 4x4), we can search deeper
+        # For large boards (e.g., 8x8), we need shallower search
+        if totalSpaces <= 16:  # 4x4 or smaller
+            maxDepth = 8
+        elif totalSpaces <= 30:  # 5x6 or 6x5
+            maxDepth = 6
+        elif totalSpaces <= 42:  # 6x7 (standard Connect 4)
+            maxDepth = 5
+        elif totalSpaces <= 64:  # 8x8
+            maxDepth = 4
+        else:
+            maxDepth = 3
+
+        # Adjust based on win requirement: smaller winNum means longer games (more defense and less aggressive moves), need shallower depth
+        if board.winNum <= 2:
+            # For very small win requirements on large boards, use very shallow depth
+            if totalSpaces >= 64:  # Large boards (8x8 or bigger)
+                maxDepth = 2  # Very shallow for large boards with small winNum
+            else:
+                maxDepth = max(2, maxDepth - 2)
+        elif board.winNum == 3:
+            maxDepth = max(3, maxDepth - 1)  # Slightly reduce depth
+
+        return maxDepth
+
     def getMove(self, gameBoard) -> [int]:
         """
         minimax algorithm - without pruning
         returns the best column play base on input x
         and exploring all possible moves
         """
-        # rest counter for the move because we are using the same object for both players (this algorithm work for both sides)
+        # expanded -> track the number of nodes that are explored
         self.numExpanded = 0
 
         # identify if we are trying to minimize or maximize the current status of the boar:
@@ -55,19 +91,25 @@ class Player:
         bestScore = -math.inf
         bestMove = 0  # default to the first column, not setting this to -1 because we must made a decision regardless
 
+        # Calculate adaptive depth limit based on board size
+        maxDepth = self._calculateMaxDepth(gameBoard)
+        # Force flush to ensure debug output appears immediately
+        print(
+            f"DEBUG: Calculated maxDepth = {maxDepth} for {gameBoard.numRows}x{gameBoard.numColumns} board (winNum={gameBoard.winNum})",
+            flush=True,
+        )
+
         # iterate through all possible moves:
         for col in range(gameBoard.numColumns):
             # check if the column is full:
-            # Check if the current column 'col' is not full.
-            # gameBoard.colFills[col] is the number of pieces currently in column 'col'.
-            # gameBoard.numRows is the total number of rows available in the board.
             if gameBoard.colFills[col] < gameBoard.numRows:
                 # create a copy of the board and make a move on it:
                 boardCopy = gameBoard.copy()
                 boardCopy.addPiece(col, self.name)
 
                 # recursively evaluate the score of the board (opponent's perspective):
-                score = self._minimax(boardCopy, False, self.name, opponent)
+                # Pass the adaptive depth limit
+                score = self._minimax(boardCopy, False, self.name, opponent, maxDepth)
 
                 # update the best score and best move:
                 if score > bestScore:
@@ -95,6 +137,9 @@ class Player:
         alpha = float("-inf")
         beta = float("inf")
 
+        # Calculate adaptive depth limit based on board size
+        maxDepth = self._calculateMaxDepth(gameBoard)
+
         # Try each possible column
         for col in range(gameBoard.numColumns):
             if gameBoard.colFills[col] < gameBoard.numRows:
@@ -102,8 +147,9 @@ class Player:
                 boardCopy.addPiece(col, self.name)
 
                 # Recursively evaluate with alpha-beta pruning
+                # Pass the adaptive depth limit and current alpha/beta bounds
                 score = self._minimaxAlphaBeta(
-                    boardCopy, False, self.name, opponent, alpha, beta
+                    boardCopy, False, self.name, opponent, alpha, beta, maxDepth
                 )
 
                 # Update best move if this is better
@@ -111,14 +157,21 @@ class Player:
                     bestScore = score
                     bestMove = col
 
-                # Update alpha
+                # Update alpha (best score found so far for maximizer)
                 alpha = max(alpha, bestScore)
+
+                # Pruning: if alpha >= beta, we can skip remaining moves
+                # (opponent won't allow us to get a better score)
+                if alpha >= beta:
+                    break
 
         return bestMove
 
-    def _minimax(self, board, isMaximizing: bool, player, opponenet) -> int:
+    def _minimax(
+        self, board, isMaximizing: bool, player, opponenet, max_depth: int = 1000
+    ) -> int:
         """
-                Recursive Minimax function without pruning:
+        Recursive Minimax function without pruning:
         args:
             board
             ismaximizing: bool (true if its the maximizng player's turn, false is the minimizing player's turn)
@@ -130,7 +183,14 @@ class Player:
         # increment the number of nodes expanded:
         self.numExpanded += 1
 
-        # check for terminal states:
+        # Debug: print depth on first few calls
+        if self.numExpanded <= 10:
+            print(
+                f"DEBUG: _minimax call #{self.numExpanded} with max_depth = {max_depth}, isMaximizing = {isMaximizing}",
+                flush=True,
+            )
+
+        # check for terminal states FIRST (these are definitive):
         # base case: if the board is a win, return the score:
         if board.checkWin():
             # large magnitude ensures the terminal states dominated
@@ -145,37 +205,68 @@ class Player:
         if board.checkFull():
             return 0
 
+        # check if we have reached the maximum depth (after checking terminal states):
+        if max_depth <= 0:
+            if self.numExpanded <= 5:  # Only print first few times to avoid spam
+                print(
+                    f"DEBUG: Reached depth limit (max_depth={max_depth}), using heuristic",
+                    flush=True,
+                )
+            return self._evaluateBoard(board, player, opponenet)
+
         if isMaximizing:
             bestScore = -math.inf
 
             # try all possible moves and return the best score:
+            validMoves = 0
             for col in range(board.numColumns):
                 if board.colFills[col] < board.numRows:
+                    validMoves += 1
                     # create a copy of the board and make a move on it:
                     boardCopy = board.copy()
                     boardCopy.addPiece(col, player)
                     # recursively evaluate the score of the board:
-                    score = self._minimax(boardCopy, False, player, opponenet)
+                    # Decrement depth for recursive call
+                    score = self._minimax(
+                        boardCopy, False, player, opponenet, max_depth - 1
+                    )
                     bestScore = max(bestScore, score)
+            if self.numExpanded <= 10:
+                print(
+                    f"DEBUG: Maximizing branch found {validMoves} valid moves, bestScore = {bestScore}",
+                    flush=True,
+                )
             return bestScore
 
         else:
             bestScore = math.inf
             # try all possible moves and return the lowest score:
 
+            validMoves = 0
             for col in range(board.numColumns):
                 if board.colFills[col] < board.numRows:
+                    validMoves += 1
                     # create a copy of the board and make a move on it:
                     boardCopy = board.copy()
                     boardCopy.addPiece(col, opponenet)
                     # recursively evaluate the score of the board:
                     # After opponent moves, it becomes our turn (maximizing), so pass True
-                    score = self._minimax(boardCopy, True, player, opponenet)
+                    # Decrement depth for recursive call
+                    score = self._minimax(
+                        boardCopy, True, player, opponenet, max_depth - 1
+                    )
                     # track the worst score from our perspective (opponent wants to minimize our score):
                     bestScore = min(bestScore, score)
+            if self.numExpanded <= 10:
+                print(
+                    f"DEBUG: Minimizing branch found {validMoves} valid moves, bestScore = {bestScore}",
+                    flush=True,
+                )
             return bestScore
 
-    def _minimaxAlphaBeta(self, board, isMaximizing, player, opponent, alpha, beta):
+    def _minimaxAlphaBeta(
+        self, board, isMaximizing, player, opponent, alpha, beta, max_depth: int = 1000
+    ):
         """
             Recursive minimax function with alpha-beta pruning.
 
@@ -190,7 +281,7 @@ class Player:
         # increment the number of nodes expanded:
         self.numExpanded += 1
 
-        # Check terminal states (same as regular minimax)
+        # Check terminal states first because they are definitive (known state)
         if board.checkWin():
             if board.lastPlay[2] == player:
                 return 1000
@@ -200,6 +291,10 @@ class Player:
         if board.checkFull():
             return 0
 
+        # check if we have reached the maximum depth (after checking terminal states):
+        if max_depth <= 0:
+            return self._evaluateBoard(board, player, opponent)
+
         # If maximizing (our turn)
         if isMaximizing:
             bestScore = float("-inf")
@@ -208,7 +303,7 @@ class Player:
                 if board.colFills[col] < board.numRows:
                     board.addPiece(col, player)
                     score = self._minimaxAlphaBeta(
-                        board, False, player, opponent, alpha, beta
+                        board, False, player, opponent, alpha, beta, max_depth - 1
                     )
                     board.removePiece(col)
 
@@ -231,7 +326,7 @@ class Player:
                 if board.colFills[col] < board.numRows:
                     board.addPiece(col, opponent)
                     score = self._minimaxAlphaBeta(
-                        board, True, player, opponent, alpha, beta
+                        board, True, player, opponent, alpha, beta, max_depth - 1
                     )
                     board.removePiece(col)
 
@@ -246,4 +341,41 @@ class Player:
 
             return worstScore
 
-            # since the connect 4 is
+    # note that minimaxalphabeta algorithm must reach the end of the tree to return the best score via backtracking, it obviously doesnt make any sense for it to search the board for all possible moves if e.g. num_rows = 8, num_columns = 8, and win_num = 2, because the algorithm will have to search 8^8 = 16777216 nodes, which is obviously not feasible.
+
+    # even with the use of alpha-beta pruning, the searching over 8^64 nodes is still an astronomical amount to the computer, thus there is a necessisty to implement a heuristic function to guide the search, and a depth limitng function to limit the search to a reasonable depth.
+
+    # But we only use such methdology in a more high number of possibilies, when is feasible to reach all the terminal states, we prefer to use minimax
+
+    # Bestscore:
+    # bestscore in getmove() -> used to find the best column to play at the root level
+    # used to compares scores across different columns
+    # bestscore in _minimax() -> find the best score at a given node in the game tree
+    # compare scores att different moves at that node
+
+    def _evaluateBoard(self, board, player, opponent):
+        """
+        Evaluate board position without reaching terminal state.
+        Returns a score estimate from player's perspective.
+
+        Simple piece count difference
+        This is a basic heuristic that works but can be significantly improved.
+        """
+        score = 0
+        playerPieces = 0
+        opponentPieces = 0
+
+        for row in range(board.numRows):
+            for col in range(board.numColumns):
+                space = board.checkSpace(row, col)
+                if space.value == player:
+                    playerPieces += 1
+                elif space.value == opponent:
+                    opponentPieces += 1
+
+        score = playerPieces - opponentPieces
+
+        # Potential improvements: threat detection, center control, connected pieces,
+        # positional advantage, and weighted pattern scoring (e.g., 3-in-a-row = +100)
+
+        return score
