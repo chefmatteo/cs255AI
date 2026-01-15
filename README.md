@@ -12,38 +12,6 @@ This coursework project implements adversarial search algorithms (minimax with a
 - **Statistical analysis** across multiple configurations
 - **Research report** analyzing algorithm scaling behavior and complexity
 
-## Project Structure
-
-```
-cs255AI/
-├── cs255_cw_files/              # Core implementation
-│   ├── board.py                  # Board class and game logic
-│   ├── game.py                   # Human vs bot gameplay
-│   ├── bots_game.py              # Optimized bot vs bot gameplay
-│   ├── player.py                 # Minimax implementation (with/without pruning)
-│   ├── opponent.py               # Opponent wrapper class
-│   ├── randomPlayer.py           # Random player for testing
-│   ├── runGame.py                # Command line game runner
-│   ├── runGameTwoBots.py         # Bot vs bot game runner
-│   ├── graphs/                   # Benchmarking and visualization
-│   │   ├── benchmark.py          # Comprehensive benchmarking suite
-│   │   ├── run_benchmark.py      # Benchmark execution script
-│   │   ├── benchmark_results.csv # Performance data
-│   │   └── performance_comparison.pdf/png  # Visualization outputs
-│   ├── templates/                # Report templates
-│   │   ├── report-template.tex   # LaTeX template
-│   │   └── plot-example.py       # Plotting examples
-│   └── report-resources/         # Additional report materials
-├── report/                       # Research report
-│   ├── report.tex                # Main LaTeX document
-│   ├── report.pdf                # Compiled report
-│   ├── compile.sh                # Manual compilation script
-│   ├── auto_compile.sh           # Auto-compile script
-│   └── watch_compile.sh          # Watch mode compilation
-├── requirements.txt              # Python dependencies
-└── README.md                     # This file
-```
-
 ## Setup
 
 ### Prerequisites
@@ -215,10 +183,3 @@ Based on comprehensive benchmarking across 18 configurations:
 
 See `report/report.pdf` for detailed analysis and visualizations.
 
-## License
-
-This project is part of CS255 coursework. See the original coursework specification for details.
-
-## Author
-
-21052135 - Adversarial Search Tasks
