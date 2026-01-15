@@ -1,0 +1,9 @@
+board_size,depth,winNum,status,expected_minmax,expected_alphabeta,expected_reduction,actual_minmax,actual_alphabeta,actual_reduction,minmax_diff,alphabeta_diff,reduction_diff
+4x4,3,N/A,NOT FOUND,340,61,82.1,,,,,,
+4x4,4,4,MATCH,1360,139,89.8,1360.0,139.0,89.8,0.0,0.0,0.0
+5x5,3,N/A,NOT FOUND,780,92,88.2,,,,,,
+5x5,4,4,MATCH,3905,241,93.8,3905.0,241.0,93.8,0.0,0.0,0.0
+6x7,3,N/A,NOT FOUND,2800,172,93.9,,,,,,
+6x7,4,4,MATCH,19607,563,97.1,19607.0,563.0,97.1,0.0,0.0,0.0
+8x8,3,N/A,NOT FOUND,4680,221,95.3,,,,,,
+8x8,4,4,MATCH,37448,796,97.9,37448.0,796.0,97.9,0.0,0.0,0.0

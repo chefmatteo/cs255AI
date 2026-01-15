@@ -24,9 +24,9 @@ p2 = opponent.Opponent("O", use_alpha_beta=True)
 # g = bots_game.BotsGame(p1, p2, 4, 5, 3)
 # g = bots_game.BotsGame(p1, p2, 4, 4, 4)
 # g = bots_game.BotsGame(p1, p2, 4, 4, 3)
-g = bots_game.BotsGame(p1, p2, 8, 8, 3)
+g = bots_game.BotsGame(p1, p2, 8, 8, 7)
 
 # Play game with independent pruning control for each player
 # Arguments: player1_pruning, player2_pruning
 # Both True = both use alpha-beta (recommended for performance)
-g.playGame(player1_pruning=True, player2_pruning=True)
+g.playGame(player1_pruning=False, player2_pruning=False)
