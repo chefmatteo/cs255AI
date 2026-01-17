@@ -108,7 +108,7 @@ class Player:
         # expanded -> track the number of nodes that are explored
         self.numExpanded = 0
 
-        # identify if we are trying to minimize or maximize the current status of the boar:
+        # identify if we are trying to minimize or maximize the current status of the board:
         opponent = "O" if self.name == "X" else "X"
 
         # initialize the best score and best move:
@@ -272,9 +272,9 @@ class Player:
 
         arguments:
         board
-        ismaximizing: bool (true if its the maximizng player's turn, false is the minimizing player's turn)
+        isMaximizing: bool (true if its the maximizing player's turn, false is the minimizing player's turn)
         player: str
-        opponenet: str
+        opponent: str
         
         expected return:    
         Returns the best score for the current player based on the board state and the player's perspective.
