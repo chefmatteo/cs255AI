@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 
-\usepackage[top=1cm, bottom=0.75in, left=0.8in, right=0.8in]{geometry}\usepackage[lined, boxed, linesnumbered]{algorithm2e}
+\usepackage[top=1cm, bottom=0.75in, left=0.8in, right=0.8in]{geometry}
+\usepackage[lined, boxed, linesnumbered]{algorithm2e}
 \usepackage[Sonny]{fncychap}
 \usepackage{fancyhdr}
 \usepackage{graphicx}
@@ -26,7 +27,7 @@ In the following report, we will analyze minimax and alpha-beta pruning on vario
 
 \subsection{Scaling Behavior and Complexity Reduction}
 
-The relationship between board size and algorithm performance reveals cruical insights into the computational complexity of adversarial search. Table~\ref{table:scaling} presents comprehensive metrics across configurations, revealing that alpha-beta pruning's effectiveness raises super-linearly with problem scale.
+The relationship between board size and algorithm performance reveals crucial insights into the computational complexity of adversarial search. Table~\ref{table:scaling} presents comprehensive metrics across configurations, revealing that alpha-beta pruning's effectiveness raises super-linearly with problem scale.
 
 \begin{table}[h!]
 \centering
@@ -51,8 +52,7 @@ Board & winNum & Depth & Nodes (MinMax) & Nodes (AB) & Reduction \\
 \label{table:scaling}
 \end{table}
 
-The largest pruning rates are achieved on bigger boards, such as the 8$\times$8 case, where at search depth 5 with \texttt{winNum} set to 2, pruning reaches 99.6\%. We hypothesize that reduction percentage $R$ grows roughly logarithmically with board area $A$: $R \approx a \log(A) + b$.
-
+The largest pruning rates are achieved on bigger boards, such as the 8$\times$8 case, where at search depth 5 with \texttt{winNum} set to 2, pruning reaches 99.6\%. We hypothesize that reduction percentage $R$ grows roughly logarithmically with board area $A$: $R \approx a \log(A) + b$. This pattern suggests that as the search space expands, alpha-beta pruning can eliminate increasingly larger portions of the game tree. 
 
 \subsection{Effective Branching Factor Analysis}
 
@@ -98,7 +98,7 @@ The speedup factor $S = T_{minmax}/T_{alphabeta}$ exhibits exponential growth: f
 
 \subsection{Pruning Efficiency Patterns}
 
-Another finding emerges from pruning rate analysis: \textit{pruning rates vary with depth and board size in complex ways}. At depth 4, pruning rates range from 14.9\% to 20.6\% on primary configurations, but at depth 5, rates increase to 26.4-27.5\% on larger boards (6$\times$7 and 8$\times$8). This suggests that while initial depth increases may reduce pruning opportunities due to game tree symmetry and balanced evaluations, deeper searches on larger boards eventually encounter more pruneable branches as the search space expands.
+Another finding we have identified from pruning rate analysis is that \textit{pruning rates vary with depth and board size in complex ways}. At depth 4, pruning rates range from 14.9\% to 20.6\% on primary configurations, but at depth 5, rates increase to 26.4-27.5\% on larger boards (6$\times$7 and 8$\times$8). This suggests that while initial depth increases may reduce pruning opportunities due to game tree symmetry and balanced evaluations, deeper searches on larger boards eventually encounter more pruneable branches as the search space expands.
 
 \subsection{Impact of Win Condition (winNum)}
 
@@ -117,10 +117,10 @@ Alpha-beta pruning achieves 7-19$\times$ higher node processing speed (Table~\re
 \toprule
 Board & Depth & Throughput (MinMax) & Throughput (AB) \\
 \midrule
-4$\times$4 & 3 & 5,472 & 71,189 \\
-5$\times$5 & 4 & 7,139 & 86,469 \\
-6$\times$7 & 4 & 4,522 & 71,757 \\
-8$\times$8 & 4 & 3,054 & 52,663 \\
+4$\times$4 & 4 & 9,095 & 96,254 \\
+5$\times$5 & 4 & 7,316 & 86,878 \\
+6$\times$7 & 4 & 4,365 & 73,422 \\
+8$\times$8 & 4 & 3,061 & 56,286 \\
 \bottomrule
 \end{tabular}
 \caption{Node processing throughput (nodes/second) showing alpha-beta's superior efficiency.}
@@ -135,7 +135,7 @@ The complexity ratio $C = N_{AB}/N_{MinMax}$ provides insight into scalability. 
 
 \subsection{Statistical Analysis: Mean and Standard Deviation}
 
-Table~\ref{table:statistics} presents statistical measures across all 18 benchmark configurations (9 board configurations $\times$ 2 search depths). Since minimax and alpha-beta are \textit{deterministic} algorithms, repeated runs of identical configurations yield std = 0; reported statistics reflect variability across different board sizes, depths, and winNum values.
+Table~\ref{table:statistics} presents statistical measures across all 18 benchmark configurations (9 board configurations $\times$ 2 search depths). Since minimax and alpha-beta are deterministic algorithms, repeated runs of identical configurations yield std = 0. Obtained statistics reflect variability across different board sizes, depths, and winNum values.
 
 \begin{table}[h!]
 \centering
